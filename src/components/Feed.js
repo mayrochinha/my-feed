@@ -1,7 +1,7 @@
 import userIcon from "../images/user.svg";
 import clockIcon from "../images/clock.svg";
 import emptyFolderIcon from "../images/empty-folder.svg";
-import loader from '../images/loader-primary.svg'
+import loader from '../images/loader-primary.svg';
 
 import "../styles/Feed.css";
 
@@ -10,7 +10,7 @@ export default function Feed(props) {
     return <img src={loader} alt="Loading" className="spin" />;
   }
   
-  if (props.posts.length == 0) {
+  if (props.posts.length === 0) {
     return (
       <div className="feed-status">
         <img src={emptyFolderIcon} alt="Empty folder" />
@@ -23,6 +23,7 @@ export default function Feed(props) {
       </div>
     );
   }
+
   return (
     <>
       <header>
@@ -37,15 +38,13 @@ export default function Feed(props) {
 
             <footer>
               <div className="user-details">
-                <img src={userIcon} />
+                <img src={userIcon} alt="User" />
                 <strong>{post.userName}</strong>
               </div>
 
               <div className="time">
                 <img src={clockIcon} alt="Clock" />
-                <span>
-                  Publicado em {post.publishedAt.toLocaleDateString("pt-br")}
-                </span>
+                <span>Publicado em {post.publishedAt.toLocaleDateString('pt-br')}</span>
               </div>
             </footer>
           </article>
