@@ -7,87 +7,77 @@ import paperPlaneIcon from "../images/paper-plane.svg";
 import loader from "../images/loader-white.svg";
 
 import errors from "../config/errors";
+import { createPortal } from "react-dom";
+import { createPosts } from "../services/postsService";
 
 export default function PostForm(props) {
-    const [history, setHistory] = useState("");
-    const [userName, setUserName] = useState("");
-    const [isLoading, setIsLoading] = useState(false);
-    const [errorMessage, setErrorMessage] = useState(null);
+  const [history, setHistory] = useState("");
+  const [userName, setUserName] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(null);
 
-    async function handleSubmit(event) {
-        event.preventDefault();
+  async function handleSubmit(event) {
+    try {
+      event.preventDefault();
 
-        setIsLoading(true);
-        setErrorMessage(null);
+      setIsLoading(true);
+      setErrorMessage(null);
+
+      const response = await createPosts({
+        history, userName,
+      });
+
+      if (response === true) {
+        props.onSubmit({ history, userName });
 
 
-        fetch('http://localhost:3001/posts', {
-          method: 'POST',
-          body: JSON.stringify({  //o html nao aceita objeto, é preciso converter em string
-            content: history,
-            userName,
-          }),
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        })
-          .then(async (response) => {
-            if (!response.ok) {
-              const body = await response.json();
+        setHistory("");
+        setUserName("");
 
-              setErrorMessage(
-                errors[body.code] || 'Ocorreu um erro ao cadastrar o post!'
-              );
-              return;
-            }
+        return;
+      }
 
-            props.onSubmit({history, userName});
-            
-            
-            setHistory("");
-            setUserName("");
+      setErrorMessage(response);
 
-          })
-          .catch(() => {
-            setErrorMessage('Ocorreu um erro ao cadastrar o post!');
-          })
-          .finally(() => {
-            setIsLoading(false);
-          });
-        
-
+    } catch {
+      setErrorMessage('Ocorreu um erro ao cadastrar o post!');
+    } finally {
+      setIsLoading(false);
     }
 
-    return (
-        <form className="post-form" onSubmit={handleSubmit}>
-         {errorMessage && (
-          <div className="error-container">
-            <strong>{errorMessage}</strong>
-          </div>
-         )}
+
+  }
+
+  return (
+    <form className="post-form" onSubmit={handleSubmit}>
+      {errorMessage && (
+        <div className="error-container">
+          <strong>{errorMessage}</strong>
+        </div>
+      )}
 
 
+      <input
+        value={history}
+        placeholder="Escreva uma nova história..."
+        onChange={(event) => setHistory(event.target.value)}
+      />
+
+      <div>
+        <img src={userIcon} alt="User" />
         <input
-          value={history}
-          placeholder="Escreva uma nova história..."
-          onChange={(event) => setHistory(event.target.value)}
+          value={userName}
+          placeholder="Digite seu nome..."
+          onChange={(event) => setUserName(event.target.value)}
         />
 
-        <div>
-          <img src={userIcon} alt="User" />
-          <input
-            value={userName}
-            placeholder="Digite seu nome..."
-            onChange={(event) => setUserName(event.target.value)}
-          />
+        <button type="submit" disabled={isLoading}>
+          {!isLoading && <img src={paperPlaneIcon} alt="Paper plane" />}
+          {isLoading && <img src={loader} alt="Loading" className="spin" />}
 
-          <button type="submit" disabled={isLoading}>
-            {!isLoading && <img src={paperPlaneIcon} alt="Paper plane" />}
-            {isLoading && <img src={loader} alt="Loading" className="spin" />}
-
-            Publicar
-          </button>
-        </div>
-      </form>
-    );
+          Publicar
+        </button>
+      </div>
+    </form>
+  );
 }
